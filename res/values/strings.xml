@@ -6,4 +6,5 @@
     <string name="notification_title_1minfix">Recent GPS position</string>
     <string name="notification_title">Last GPS read %d min. ago</string>
     <string name="notification_text">Keeping GPS online for %d min.</string>
+    <string name="alert_nogps">GPS seems to be disabled. Please enable GPS fist.</string>
 </resources>

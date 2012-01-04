@@ -19,14 +19,42 @@
 package com.github.tdudziak.gps_lock_lock;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
 
-public class LauncherActivity extends Activity {
+public class LauncherActivity extends Activity implements OnCancelListener, OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        startService(new Intent(this, LockService.class));
+
+        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            startService(new Intent(this, LockService.class));
+            finish();
+        } else {
+            AlertDialog.Builder ab = new AlertDialog.Builder(this);
+            ab.setMessage(R.string.alert_nogps)
+              .setOnCancelListener(this)
+              .setNegativeButton("Ok", this)
+              .create()
+              .show();
+        }
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        finish();
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
         finish();
     }
 }
