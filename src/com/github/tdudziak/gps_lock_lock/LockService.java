@@ -112,7 +112,7 @@ public class LockService extends Service implements LocationListener {
         mStartTime = System.currentTimeMillis();
 
         // Init UI.
-        int icon = android.R.drawable.stat_notify_sync_noanim; // FIXME
+        int icon = R.drawable.ic_stat_example;
         CharSequence ticker = getText(R.string.notification_ticker);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(this, SettingsActivity.class);
