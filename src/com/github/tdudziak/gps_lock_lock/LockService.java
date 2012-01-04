@@ -4,31 +4,27 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 
-public class LockService extends IntentService implements LocationListener {
+public class LockService extends Service implements LocationListener {
 
 	private boolean mIsActive = false;
 	private Notification mNotification;
 
 	private final String TAG = "LockService";
-	private final long MIN_TIME = 60000; // one minute
-
-	public LockService() {
-		super("LockService");
-	}
+	private final long MIN_TIME = 20000;
+	private final int NOTIFICATION_ID = 1;
 
 	private void showNotification() {
-		String ns = Context.NOTIFICATION_SERVICE;
-        NotificationManager notificationManager = (NotificationManager) getSystemService(ns);
-
-        int icon = android.R.drawable.stat_notify_sync;
+        int icon = android.R.drawable.stat_notify_sync_noanim; // FIXME
         Context context = getApplicationContext();
         Intent notificationIntent = new Intent(this, SettingsActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
@@ -37,7 +33,8 @@ public class LockService extends IntentService implements LocationListener {
 
         mNotification = new Notification(icon, title, System.currentTimeMillis());
         mNotification.setLatestEventInfo(context, title, text, contentIntent);
-        notificationManager.notify(1, mNotification);
+
+        startForeground(NOTIFICATION_ID, mNotification);
 	}
 
 	private void startListening() {
@@ -46,16 +43,25 @@ public class LockService extends IntentService implements LocationListener {
 	}
 
 	@Override
-	protected void onHandleIntent(Intent arg0) {
+	public void onDestroy() {
+		stopForeground(true);
+		Log.i(TAG, "Shutting down");
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
 		// TODO: Not sure if synchronization really required; check.
-		synchronized(this) {
-			if(mIsActive) return;
+		synchronized (this) {
+			if (mIsActive)
+				return START_STICKY;
 			mIsActive = true;
 		}
 
-		startListening();
 		showNotification();
-        Log.i(TAG, "Service started.");
+		startListening();
+		Log.i(TAG, "Service started");
+
+		return START_STICKY;
 	}
 
 	@Override
@@ -80,5 +86,10 @@ public class LockService extends IntentService implements LocationListener {
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
         Log.v(TAG, "onStatusChanged(); status=" + status);
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null; // no support for binding
 	}
 }
