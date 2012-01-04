@@ -3,7 +3,11 @@
 *.dex
 *.class
 
+*.swp
+
 bin/
 gen/
 
 local.properties
+.classpath
+.project
