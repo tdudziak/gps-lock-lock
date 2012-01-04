@@ -69,7 +69,10 @@ public class LockService extends Service implements LocationListener {
             Resources res = getResources();
             CharSequence title, text;
 
-            if(remaining <= 0) stopSelf();
+            if(remaining <= 0) {
+                stopSelf();
+                return;
+            }
 
             if(mLastFixTime <= 0) {
                 title = res.getString(R.string.notification_title_nofix);
