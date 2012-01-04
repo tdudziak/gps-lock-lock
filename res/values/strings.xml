@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GPS Lock Lock</string>
-    <string name="notification_ticker">Keeping GPS lock</string>
-    <string name="notification_title_available">Position available</string>
-    <string name="notification_title_unavailable">Waiting for position</string>
-    <string name="notification_text_available">Maintaining active status of the GPS</string>
-    <string name="notification_text_unavailable">Keeping GPS online until position is found</string>
+    <string name="notification_ticker">Forcing GPS activity</string>
+    <string name="notification_title_nofix">No GPS position yet</string>
+    <string name="notification_title_1minfix">Recent GPS position</string>
+    <string name="notification_title">Last GPS read %d min. ago</string>
+    <string name="notification_text">Keeping GPS online for %d min.</string>
 </resources>
