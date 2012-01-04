@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SettingsActivity</string>
+    <string name="app_name">GPS Lock Lock</string>
+    <string name="notification_title">Keeping GPS lock</string>
+    <string name="notification_text">GPS will be kept online for a while in case you want to use it.</string>
 </resources>
