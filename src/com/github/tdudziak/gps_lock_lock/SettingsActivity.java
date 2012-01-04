@@ -12,21 +12,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class SettingsActivity extends Activity implements OnClickListener
-{
+public class SettingsActivity extends Activity implements OnClickListener {
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        TextView tv = (TextView)findViewById(R.id.startButton);
+        TextView tv = (TextView) findViewById(R.id.startButton);
         tv.setOnClickListener(this);
     }
 
-    public void onClick(View v)
-    {
+    public void onClick(View v) {
         startService(new Intent(this, LockService.class));
     }
 }
