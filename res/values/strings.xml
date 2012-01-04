@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GPS Lock Lock</string>
-    <string name="notification_title">Keeping GPS lock</string>
-    <string name="notification_text">GPS will be kept online for a while in case you want to use it.</string>
+    <string name="notification_ticker">Keeping GPS lock</string>
+    <string name="notification_title_available">Position available</string>
+    <string name="notification_title_unavailable">Waiting for position</string>
+    <string name="notification_text_available">Maintaining active status of the GPS</string>
+    <string name="notification_text_unavailable">Keeping GPS online until position is found</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.github.tdudziak.gps_lock_lock;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,41 +9,67 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
 public class LockService extends Service implements LocationListener {
 
+	private final String TAG = "LockService";
+	private final long GPS_MIN_TIME = 20000;
+	private final long LOCK_LOCK_TIME = 15*60*60*1000;
+	private final int NOTIFICATION_ID = 1;
+	
 	private boolean mIsActive = false;
 	private Notification mNotification;
+	private PendingIntent mNotificationIntent;
+	private LocationManager mLocationManager;
+	private NotificationManager mNotificationManager;
 
-	private final String TAG = "LockService";
-	private final long MIN_TIME = 20000;
-	private final int NOTIFICATION_ID = 1;
-
+	private void setFixState(boolean has_fix) {
+		assert mNotification != null;
+		CharSequence title, text;
+		
+		if(has_fix) {
+			title = getText(R.string.notification_title_available);
+			text = getText(R.string.notification_text_available);
+		} else {
+			title = getText(R.string.notification_title_unavailable);
+			text = getText(R.string.notification_text_unavailable);
+		}
+		
+		mNotification.setLatestEventInfo(getApplicationContext(), title, text, mNotificationIntent);
+		startForeground(NOTIFICATION_ID, mNotification);
+	}
+	
 	private void showNotification() {
         int icon = android.R.drawable.stat_notify_sync_noanim; // FIXME
-        Context context = getApplicationContext();
+        CharSequence ticker = getText(R.string.notification_ticker);
+        
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(this, SettingsActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        CharSequence title = getText(R.string.notification_title);
-        CharSequence text = getText(R.string.notification_text);
-
-        mNotification = new Notification(icon, title, System.currentTimeMillis());
-        mNotification.setLatestEventInfo(context, title, text, contentIntent);
-
-        startForeground(NOTIFICATION_ID, mNotification);
+        mNotificationIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        mNotification = new Notification(icon, ticker, System.currentTimeMillis());
+        
+        setFixState(false);
 	}
 
 	private void startListening() {
-		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, 0, this);
+		mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, 0, this);
+	}
+	
+	private void stopEverything() {
+		Log.i(TAG, "Disabling lock-locking");
+		mLocationManager.removeUpdates(this);
+		stopForeground(true);
+		mIsActive = false;
 	}
 
 	@Override
 	public void onDestroy() {
-		stopForeground(true);
+		stopEverything();
 		Log.i(TAG, "Shutting down");
 	}
 
@@ -68,17 +93,18 @@ public class LockService extends Service implements LocationListener {
 	public void onLocationChanged(Location location) {
 		// TODO Auto-generated method stub
         Log.v(TAG, "onLocationChanged()");
+        setFixState(true);
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		// TODO Auto-generated method stub
-        Log.v(TAG, "onProviderDisabled()");
+        // GPS explicitly turned off. The user obviously does not want a GPS fix.
+        stopEverything();
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
-		// TODO Auto-generated method stub
+		// This probably should never happen. If it does, ignore.
         Log.v(TAG, "onProviderEnabled()");
 	}
 
@@ -86,6 +112,12 @@ public class LockService extends Service implements LocationListener {
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
         Log.v(TAG, "onStatusChanged(); status=" + status);
+        
+        if(status == LocationProvider.AVAILABLE) {
+        	setFixState(true);
+        } else {
+        	setFixState(false);
+        }
 	}
 
 	@Override
