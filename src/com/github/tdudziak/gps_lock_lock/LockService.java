@@ -38,8 +38,10 @@ public class LockService extends Service implements LocationListener {
 
     private final String TAG = "LockService";
     private final long GPS_MIN_TIME = 0; // 20000;
-    private final long LOCK_LOCK_MINUTES = 5;
     private final int NOTIFICATION_ID = 1;
+
+    public final static String ACTION_SHUTDOWN = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_SHUTDOWN";
+    public static final long LOCK_LOCK_MINUTES = 5;
 
     private boolean mIsActive = false; // TODO: Get rid of this field.
     private long mStartTime;
@@ -102,10 +104,21 @@ public class LockService extends Service implements LocationListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // FIXME: Is using startService() to stop a service really in the spirit
+        // of this API?
+        if(ACTION_SHUTDOWN.equals(intent.getAction())) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         // TODO: Not sure if synchronization really required; check.
         synchronized (this) {
-            if (mIsActive)
+            if (mIsActive) {
+                // To restart just reset the start time.
+                mStartTime = System.currentTimeMillis();
+                Log.i(TAG, "Restarting.");
                 return START_STICKY;
+            }
             mIsActive = true;
         }
 

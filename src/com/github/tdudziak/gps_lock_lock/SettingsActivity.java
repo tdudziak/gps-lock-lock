@@ -19,22 +19,61 @@
 package com.github.tdudziak.gps_lock_lock;
 
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.Notification;
-import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
+import android.text.method.LinkMovementMethod;
 
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends Activity implements OnClickListener
+{
+    TextView mTextStatus;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        // Enable links in textInfo.
+        TextView info = (TextView) findViewById(R.id.textInfo);
+        info.setMovementMethod(LinkMovementMethod.getInstance());
+
+        findViewById(R.id.buttonStop).setOnClickListener(this);
+
+        Button restart = (Button) findViewById(R.id.buttonRestart);
+        restart.setOnClickListener(this);
+        String r_format = getResources().getString(R.string.button_restart);
+        restart.setText(String.format(r_format, LockService.LOCK_LOCK_MINUTES));
+
+        mTextStatus = (TextView) findViewById(R.id.textStatus);
+        String s_format = getResources().getString(R.string.text_status);
+        mTextStatus.setText(String.format(s_format, LockService.LOCK_LOCK_MINUTES)); // FIXME: temporary and incorrect
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+        case R.id.buttonRestart:
+            start();
+            break;
+
+        case R.id.buttonStop:
+            stop();
+            finish();
+            break; // unreachable?
+        }
+    }
+
+    private void start() {
+        startService(new Intent(this, LockService.class));
+    }
+
+    private void stop() {
+        Intent intent = new Intent(LockService.ACTION_SHUTDOWN);
+        intent.setClass(this, LockService.class);
+        startService(intent);
     }
 }
