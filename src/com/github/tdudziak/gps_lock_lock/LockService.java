@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 public class LockService extends Service implements LocationListener {
@@ -41,6 +42,9 @@ public class LockService extends Service implements LocationListener {
     private final int NOTIFICATION_ID = 1;
 
     public final static String ACTION_SHUTDOWN = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_SHUTDOWN";
+    public final static String ACTION_UI_UPDATE = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_UI_UPDATE";
+    public static final String EXTRA_TIME_LEFT = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_TIME_LEFT";
+
     public static final long LOCK_LOCK_MINUTES = 5;
 
     private boolean mIsActive = false; // TODO: Get rid of this field.
@@ -89,8 +93,14 @@ public class LockService extends Service implements LocationListener {
             mNotification.setLatestEventInfo(getApplicationContext(), title, text, mNotificationIntent);
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
 
+            // TODO: Get rid of some RefreshHandler code and use a BroadcastReceiver?
+            Intent intent = new Intent(ACTION_UI_UPDATE);
+            intent.putExtra(EXTRA_TIME_LEFT, (int) remaining);
+            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(LockService.this);
+            lbm.sendBroadcast(intent);
+
             removeMessages(WHAT);
-            sendEmptyMessageDelayed(WHAT, 1000);
+            sendEmptyMessageDelayed(WHAT, 1000); // FIXME: the delay is way too small
         }
     }
 

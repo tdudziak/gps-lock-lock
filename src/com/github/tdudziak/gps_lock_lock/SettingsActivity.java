@@ -19,17 +19,24 @@
 package com.github.tdudziak.gps_lock_lock;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.method.LinkMovementMethod;
 
 public class SettingsActivity extends Activity implements OnClickListener
 {
-    TextView mTextStatus;
+    private TextView mTextStatus;
+    private BroadcastReceiver mUiUpdateBroadcastReceiver;
+    private Button mButtonRestart;
 
     /** Called when the activity is first created. */
     @Override
@@ -43,14 +50,27 @@ public class SettingsActivity extends Activity implements OnClickListener
 
         findViewById(R.id.buttonStop).setOnClickListener(this);
 
-        Button restart = (Button) findViewById(R.id.buttonRestart);
-        restart.setOnClickListener(this);
+        mButtonRestart = (Button) findViewById(R.id.buttonRestart);
+        mButtonRestart.setOnClickListener(this);
         String r_format = getResources().getString(R.string.button_restart);
-        restart.setText(String.format(r_format, LockService.LOCK_LOCK_MINUTES));
+        mButtonRestart.setText(String.format(r_format, LockService.LOCK_LOCK_MINUTES));
 
         mTextStatus = (TextView) findViewById(R.id.textStatus);
         String s_format = getResources().getString(R.string.text_status);
         mTextStatus.setText(String.format(s_format, LockService.LOCK_LOCK_MINUTES)); // FIXME: temporary and incorrect
+
+        mUiUpdateBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.v("SettingsActivity", "onReceive()");
+                Log.v("SettingsActivity", intent.toString());
+                int left = intent.getIntExtra(LockService.EXTRA_TIME_LEFT, -1);
+                assert left != -1;
+
+                String s_format = getResources().getString(R.string.text_status);
+                mTextStatus.setText(String.format(s_format, left));
+            }
+        };
     }
 
     @Override
@@ -65,6 +85,20 @@ public class SettingsActivity extends Activity implements OnClickListener
             finish();
             break; // unreachable?
         }
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mUiUpdateBroadcastReceiver);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
+        IntentFilter filter = new IntentFilter(LockService.ACTION_UI_UPDATE);
+        bm.registerReceiver(mUiUpdateBroadcastReceiver, filter);
+        super.onResume();
     }
 
     private void start() {
