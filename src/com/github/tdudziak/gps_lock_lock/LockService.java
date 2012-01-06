@@ -18,13 +18,9 @@
 
 package com.github.tdudziak.gps_lock_lock;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -38,23 +34,21 @@ import android.util.Log;
 public class LockService extends Service implements LocationListener {
 
     private final String TAG = "LockService";
-    private final long GPS_MIN_TIME = 0; // 20000;
-    private final int NOTIFICATION_ID = 1;
+    private final long GPS_MIN_TIME = 0; // 20000; FIXME FIXME
 
     public final static String ACTION_SHUTDOWN = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_SHUTDOWN";
     public final static String ACTION_UI_UPDATE = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_UI_UPDATE";
     public static final String EXTRA_TIME_LEFT = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_TIME_LEFT";
+    public static final String EXTRA_LAST_FIX = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_LAST_FIX";
 
     public static final long LOCK_LOCK_MINUTES = 5;
 
     private boolean mIsActive = false; // TODO: Get rid of this field.
     private long mStartTime;
     private long mLastFixTime = 0;
-    private Notification mNotification;
-    private PendingIntent mNotificationIntent;
     private LocationManager mLocationManager;
-    private NotificationManager mNotificationManager;
     private RefreshHandler mHandler;
+    private NotificationUi mNotificationUi;
 
     private class RefreshHandler extends Handler {
         private final int WHAT = 0;
@@ -62,45 +56,34 @@ public class LockService extends Service implements LocationListener {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            redrawUI();
-        }
-
-        public void redrawUI() {
             if(!mIsActive) return;
 
             long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
             long remaining = LOCK_LOCK_MINUTES - minutes;
-            long last_min = (System.currentTimeMillis() - mLastFixTime)/(1000*60);
+            long last_fix = (System.currentTimeMillis() - mLastFixTime)/(1000*60);
 
-            Resources res = getResources();
-            CharSequence title, text;
+            if(mLastFixTime == 0) last_fix = -1; // special value meaning "never"
 
             if(remaining <= 0) {
                 stopSelf();
                 return;
             }
 
-            if(mLastFixTime <= 0) {
-                title = res.getString(R.string.notification_title_nofix);
-            } else if(last_min > 0) {
-                title = String.format(res.getString(R.string.notification_title), last_min);
-            } else {
-                title = res.getString(R.string.notification_title_1minfix);
-            }
-
-            text = String.format(res.getString(R.string.notification_text), remaining);
-
-            mNotification.setLatestEventInfo(getApplicationContext(), title, text, mNotificationIntent);
-            mNotificationManager.notify(NOTIFICATION_ID, mNotification);
-
-            // TODO: Get rid of some RefreshHandler code and use a BroadcastReceiver?
             Intent intent = new Intent(ACTION_UI_UPDATE);
             intent.putExtra(EXTRA_TIME_LEFT, (int) remaining);
+            intent.putExtra(EXTRA_LAST_FIX, (int) last_fix);
+
             LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(LockService.this);
             lbm.sendBroadcast(intent);
 
+            // Schedule another update.
             removeMessages(WHAT);
             sendEmptyMessageDelayed(WHAT, 1000); // FIXME: the delay is way too small
+        }
+
+        public void broadcastNow() {
+            removeMessages(WHAT);
+            sendEmptyMessage(WHAT);
         }
     }
 
@@ -109,6 +92,7 @@ public class LockService extends Service implements LocationListener {
         mLocationManager.removeUpdates(this);
         stopForeground(true);
         mIsActive = false;
+        mNotificationUi.disable();
         Log.i(TAG, "Shutting down");
     }
 
@@ -134,18 +118,17 @@ public class LockService extends Service implements LocationListener {
 
         mStartTime = System.currentTimeMillis();
 
-        // Init UI.
-        int icon = R.drawable.ic_stat_example;
-        CharSequence ticker = getText(R.string.notification_ticker);
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent notificationIntent = new Intent(this, SettingsActivity.class);
-        mNotificationIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        mNotification = new Notification(icon, ticker, mStartTime);
+        // Setup UI
+        mNotificationUi = new NotificationUi(this);
+        mNotificationUi.enable();
 
         // Start periodical UI updates.
         mHandler = new RefreshHandler();
-        mHandler.redrawUI();
-        startForeground(NOTIFICATION_ID, mNotification);
+        mHandler.broadcastNow();
+
+        // Tell Android that this service is related to a visible notification.
+        // FIXME: mNotificationUi.getNotification() is not registered at this point!
+        // startForeground(NotificationUi.NOTIFICATION_ID, mNotificationUi.getNotification());
 
         // Setup GPS listening.
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -176,7 +159,7 @@ public class LockService extends Service implements LocationListener {
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         Log.v(TAG, "onStatusChanged(); status=" + status);
-        mHandler.redrawUI();
+        mHandler.broadcastNow();
     }
 
     @Override

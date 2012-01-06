@@ -106,6 +106,7 @@ public class SettingsActivity extends Activity implements OnClickListener
     }
 
     private void stop() {
+        // FIXME: Throws exception if service is unavailable.
         Intent intent = new Intent(LockService.ACTION_SHUTDOWN);
         intent.setClass(this, LockService.class);
         startService(intent);
