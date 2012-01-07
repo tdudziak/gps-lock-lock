@@ -58,16 +58,29 @@ public class LockService extends Service implements LocationListener {
             super.handleMessage(msg);
             if(!mIsActive) return;
 
+            // FIXME: Ugly duplicate code
             long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
             long remaining = LOCK_LOCK_MINUTES - minutes;
-            long last_fix = (System.currentTimeMillis() - mLastFixTime)/(1000*60);
-
-            if(mLastFixTime == 0) last_fix = -1; // special value meaning "never"
 
             if(remaining <= 0) {
                 stopSelf();
                 return;
             }
+
+            broadcastMessage(false);
+
+            // Schedule another update.
+            removeMessages(WHAT);
+            sendEmptyMessageDelayed(WHAT, 1000); // FIXME: the delay is way too small
+        }
+
+        public void broadcastMessage(boolean last_message) {
+            long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
+            long remaining = LOCK_LOCK_MINUTES - minutes;
+            long last_fix = (System.currentTimeMillis() - mLastFixTime)/(1000*60);
+
+            if(mLastFixTime == 0) last_fix = -1; // special value meaning "never"
+            if(remaining <= 0 || last_message) remaining = 0; // special value meaning "no time left"
 
             Intent intent = new Intent(ACTION_UI_UPDATE);
             intent.putExtra(EXTRA_TIME_LEFT, (int) remaining);
@@ -75,10 +88,6 @@ public class LockService extends Service implements LocationListener {
 
             LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(LockService.this);
             lbm.sendBroadcast(intent);
-
-            // Schedule another update.
-            removeMessages(WHAT);
-            sendEmptyMessageDelayed(WHAT, 1000); // FIXME: the delay is way too small
         }
 
         public void broadcastNow() {
@@ -89,6 +98,7 @@ public class LockService extends Service implements LocationListener {
 
     @Override
     public void onDestroy() {
+        mHandler.broadcastMessage(true);
         mLocationManager.removeUpdates(this);
         stopForeground(true);
         mIsActive = false;
@@ -101,7 +111,7 @@ public class LockService extends Service implements LocationListener {
         // FIXME: Is using startService() to stop a service really in the spirit
         // of this API?
         if(ACTION_SHUTDOWN.equals(intent.getAction())) {
-            stopSelf();
+            if(mIsActive) stopSelf();
             return START_NOT_STICKY;
         }
 

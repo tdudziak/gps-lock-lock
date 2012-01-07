@@ -69,6 +69,11 @@ public class SettingsActivity extends Activity implements OnClickListener
 
                 String s_format = getResources().getString(R.string.text_status);
                 mTextStatus.setText(String.format(s_format, left));
+
+                if(left <= 0) {
+                    // This is the last message; no time left. Shutdown.
+                    finish();
+                }
             }
         };
     }
@@ -82,8 +87,7 @@ public class SettingsActivity extends Activity implements OnClickListener
 
         case R.id.buttonStop:
             stop();
-            finish();
-            break; // unreachable?
+            break;
         }
     }
 
