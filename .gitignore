@@ -7,6 +7,9 @@
 
 bin/
 gen/
+libs/
+
+lint.xml
 
 local.properties
 .classpath
