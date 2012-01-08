@@ -31,8 +31,8 @@ import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-public class LockService extends Service implements LocationListener {
-
+public class LockService extends Service implements LocationListener
+{
     private final String TAG = "LockService";
     private final long GPS_MIN_TIME = 0; // 20000; FIXME FIXME
 
@@ -51,19 +51,23 @@ public class LockService extends Service implements LocationListener {
     private NotificationUi mNotificationUi;
 
     private class RefreshHandler extends Handler {
-        private final int WHAT = 0;
+        public static final int WHAT = 0;
 
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if(!mIsActive) return;
+
+            if(!mIsActive) {
+                Log.e(TAG, "handleMessage() called with mIsActive == false");
+                return;
+            }
 
             // FIXME: Ugly duplicate code
             long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
             long remaining = LOCK_LOCK_MINUTES - minutes;
 
             if(remaining <= 0) {
-                stopSelf();
+                disable();
                 return;
             }
 
@@ -86,6 +90,8 @@ public class LockService extends Service implements LocationListener {
             intent.putExtra(EXTRA_TIME_LEFT, (int) remaining);
             intent.putExtra(EXTRA_LAST_FIX, (int) last_fix);
 
+            Log.v(TAG, "Broadcasting: " + intent.toString());
+
             LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(LockService.this);
             lbm.sendBroadcast(intent);
         }
@@ -97,44 +103,24 @@ public class LockService extends Service implements LocationListener {
     }
 
     @Override
-    public void onDestroy() {
-        mHandler.broadcastMessage(true);
-        mLocationManager.removeUpdates(this);
-        stopForeground(true);
-        mIsActive = false;
-        mNotificationUi.disable();
-        Log.i(TAG, "Shutting down");
+    public void onCreate() {
+        mNotificationUi = new NotificationUi(this);
+        mHandler = new RefreshHandler();
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        // FIXME: Is using startService() to stop a service really in the spirit
-        // of this API?
-        if(ACTION_SHUTDOWN.equals(intent.getAction())) {
-            if(mIsActive) stopSelf();
-            return START_NOT_STICKY;
+    public void onDestroy() {
+        if(mIsActive) {
+            Log.e(TAG, "Destroying despite ongoing tracking.");
+            disable();
         }
+    }
 
-        // TODO: Not sure if synchronization really required; check.
-        synchronized (this) {
-            if (mIsActive) {
-                // To restart just reset the start time.
-                mStartTime = System.currentTimeMillis();
-                Log.i(TAG, "Restarting.");
-                return START_STICKY;
-            }
-            mIsActive = true;
-        }
-
+    private void enable() {
         mStartTime = System.currentTimeMillis();
-
-        // Setup UI
-        mNotificationUi = new NotificationUi(this);
-        mNotificationUi.enable();
-
-        // Start periodical UI updates.
-        mHandler = new RefreshHandler();
-        mHandler.broadcastNow();
+        mNotificationUi.enable(); // setup UI
+        mHandler.broadcastNow(); // start broadcasting UI update intents
+        mHandler.broadcastMessage(false);
 
         // Tell Android that this service is related to a visible notification.
         // FIXME: mNotificationUi.getNotification() is not registered at this point!
@@ -144,8 +130,39 @@ public class LockService extends Service implements LocationListener {
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, 0, this);
 
-        Log.i(TAG, "Service started");
-        return START_STICKY;
+        mIsActive = true;
+
+        Log.i(TAG, "enable()");
+    }
+
+    private void disable() {
+        mHandler.broadcastMessage(true);
+        mHandler.removeMessages(RefreshHandler.WHAT);
+        mLocationManager.removeUpdates(this);
+        stopForeground(true);
+        mNotificationUi.disable();
+        mIsActive = false;
+        Log.i(TAG, "disable()");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if(intent != null && ACTION_SHUTDOWN.equals(intent.getAction())) {
+            if(mIsActive) {
+                disable();
+            } else {
+                Log.e(TAG, "ACTION_SHUTDOWN intent received by already inactive service");
+            }
+            return START_NOT_STICKY;
+        }
+
+        if(mIsActive) {
+            Log.i(TAG, "Start intent received but already running -- restarting");
+            disable();
+        }
+
+        enable();
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -157,7 +174,7 @@ public class LockService extends Service implements LocationListener {
     @Override
     public void onProviderDisabled(String provider) {
         // GPS explicitly turned off. The user obviously does not want a GPS fix.
-        stopSelf();
+        disable();
     }
 
     @Override

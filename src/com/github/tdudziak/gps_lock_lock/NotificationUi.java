@@ -40,6 +40,9 @@ class NotificationUi
                 redraw(remaining, last_fix);
             }
         };
+
+        IntentFilter filter = new IntentFilter(LockService.ACTION_UI_UPDATE);
+        LocalBroadcastManager.getInstance(mService).registerReceiver(mReceiver, filter);
     }
 
     public void enable() {
@@ -49,11 +52,17 @@ class NotificationUi
 
     public void disable() {
         LocalBroadcastManager.getInstance(mService).unregisterReceiver(mReceiver);
-        mNotificationManager.cancel(NOTIFICATION_ID);
+        mServiceIsForeground = false;
     }
 
     private void redraw(int remaining, int last_fix) {
         String title, text;
+
+        if(remaining <= 0) {
+            // This *must* be the last message; hide the notification.
+            mNotificationManager.cancel(NOTIFICATION_ID);
+            return;
+        }
 
         if(last_fix <= 0) {
             title = mService.getString(R.string.notification_title_nofix);
@@ -64,13 +73,13 @@ class NotificationUi
         }
 
         text = String.format(mService.getString(R.string.notification_text), remaining);
-
         mNotification.setLatestEventInfo(mService, title, text, mIntent);
 
         if(mServiceIsForeground) {
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
         } else {
             mService.startForeground(NOTIFICATION_ID, mNotification);
+            mServiceIsForeground = true;
         }
     }
 }
