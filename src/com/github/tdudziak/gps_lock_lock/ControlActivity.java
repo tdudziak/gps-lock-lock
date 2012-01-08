@@ -34,7 +34,7 @@ import android.view.View.OnClickListener;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.method.LinkMovementMethod;
 
-public class SettingsActivity extends Activity implements OnClickListener
+public class ControlActivity extends Activity implements OnClickListener
 {
     private TextView mTextStatus;
     private BroadcastReceiver mUiUpdateBroadcastReceiver;

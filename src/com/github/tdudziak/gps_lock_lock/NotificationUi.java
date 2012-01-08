@@ -27,7 +27,7 @@ class NotificationUi
         int icon = R.drawable.ic_stat_example;
         CharSequence ticker = mService.getText(R.string.notification_ticker);
         mNotificationManager = (NotificationManager) mService.getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent notificationIntent = new Intent(mService, SettingsActivity.class);
+        Intent notificationIntent = new Intent(mService, ControlActivity.class);
         mIntent = PendingIntent.getActivity(mService, 0, notificationIntent, 0);
         long now = System.currentTimeMillis();
         mNotification = new Notification(icon, ticker, now);
