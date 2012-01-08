@@ -27,6 +27,8 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.support.v4.content.LocalBroadcastManager;
@@ -103,6 +105,24 @@ public class SettingsActivity extends Activity implements OnClickListener
         IntentFilter filter = new IntentFilter(LockService.ACTION_UI_UPDATE);
         bm.registerReceiver(mUiUpdateBroadcastReceiver, filter);
         super.onResume();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.options_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        switch(item.getItemId()) {
+        case R.id.menuItemSettings:
+            Intent intent = new Intent(this, AppPreferenceActivity.class);
+            startActivityForResult(intent, 0);
+            return true;
+        }
+
+        return super.onMenuItemSelected(featureId, item);
     }
 
     private void start() {
