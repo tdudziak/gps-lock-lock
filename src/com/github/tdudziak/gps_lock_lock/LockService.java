@@ -150,6 +150,7 @@ public class LockService extends Service implements LocationListener
         stopForeground(true);
         mNotificationUi.disable();
         mIsActive = false;
+        stopSelf();
         Log.i(TAG, "disable()");
     }
 
