@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <CheckBoxPreference android:key="foo_preference" android:title="Do foo" android:summary="Does foo on every execution."/>
-    <EditTextPreference android:key="bar_preference" android:title="Bar" android:summary="Input the correct value of bar"/>
+    <CheckBoxPreference
+        android:key="backgroundLaunch"
+        android:title="Launch in background"
+        android:summary="Don't show the control screen on startup."
+        android:defaultValue="false" />
 </PreferenceScreen>

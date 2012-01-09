@@ -22,11 +22,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 public class LauncherActivity extends Activity implements OnCancelListener, OnClickListener {
     @Override
@@ -37,6 +39,13 @@ public class LauncherActivity extends Activity implements OnCancelListener, OnCl
 
         if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             startService(new Intent(this, LockService.class));
+
+            // Launch control activity if configured so.
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            if(!prefs.getBoolean("backgroundLaunch", false)) {
+                startActivity(new Intent(this, ControlActivity.class));
+            }
+
             finish();
         } else {
             AlertDialog.Builder ab = new AlertDialog.Builder(this);
