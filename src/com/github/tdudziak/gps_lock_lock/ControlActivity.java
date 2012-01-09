@@ -26,7 +26,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -64,8 +63,6 @@ public class ControlActivity extends Activity implements OnClickListener
         mUiUpdateBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.v("SettingsActivity", "onReceive()");
-                Log.v("SettingsActivity", intent.toString());
                 int left = intent.getIntExtra(LockService.EXTRA_TIME_LEFT, -1);
                 assert left != -1;
 
@@ -82,13 +79,19 @@ public class ControlActivity extends Activity implements OnClickListener
 
     @Override
     public void onClick(View v) {
+        Intent intent;
+
         switch(v.getId()) {
         case R.id.buttonRestart:
-            start();
+            intent = new Intent(LockService.ACTION_RESTART);
+            intent.setClass(this, LockService.class);
+            startService(intent);
             break;
 
         case R.id.buttonStop:
-            stop();
+            intent = new Intent(LockService.ACTION_SHUTDOWN);
+            intent.setClass(this, LockService.class);
+            startService(intent);
             break;
         }
     }
@@ -104,6 +107,12 @@ public class ControlActivity extends Activity implements OnClickListener
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(this);
         IntentFilter filter = new IntentFilter(LockService.ACTION_UI_UPDATE);
         bm.registerReceiver(mUiUpdateBroadcastReceiver, filter);
+
+        // request UI update broadcast from the service
+        Intent intent = new Intent(LockService.ACTION_UI_UPDATE);
+        intent.setClass(this, LockService.class);
+        startService(intent);
+
         super.onResume();
     }
 
@@ -123,16 +132,5 @@ public class ControlActivity extends Activity implements OnClickListener
         }
 
         return super.onMenuItemSelected(featureId, item);
-    }
-
-    private void start() {
-        startService(new Intent(this, LockService.class));
-    }
-
-    private void stop() {
-        // FIXME: Throws exception if service is unavailable.
-        Intent intent = new Intent(LockService.ACTION_SHUTDOWN);
-        intent.setClass(this, LockService.class);
-        startService(intent);
     }
 }

@@ -37,13 +37,15 @@ public class LockService extends Service implements LocationListener
     private final long GPS_MIN_TIME = 0; // 20000; FIXME FIXME
 
     public final static String ACTION_SHUTDOWN = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_SHUTDOWN";
+    public final static String ACTION_RESTART = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_RESTART";
     public final static String ACTION_UI_UPDATE = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_UI_UPDATE";
+
     public static final String EXTRA_TIME_LEFT = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_TIME_LEFT";
     public static final String EXTRA_LAST_FIX = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_LAST_FIX";
 
     public static final long LOCK_LOCK_MINUTES = 5;
 
-    private boolean mIsActive = false; // TODO: Get rid of this field.
+    private boolean mIsActive = false;
     private long mStartTime;
     private long mLastFixTime = 0;
     private LocationManager mLocationManager;
@@ -120,11 +122,6 @@ public class LockService extends Service implements LocationListener
         mStartTime = System.currentTimeMillis();
         mNotificationUi.enable(); // setup UI
         mHandler.broadcastNow(); // start broadcasting UI update intents
-        mHandler.broadcastMessage(false);
-
-        // Tell Android that this service is related to a visible notification.
-        // FIXME: mNotificationUi.getNotification() is not registered at this point!
-        // startForeground(NotificationUi.NOTIFICATION_ID, mNotificationUi.getNotification());
 
         // Setup GPS listening.
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -133,6 +130,11 @@ public class LockService extends Service implements LocationListener
         mIsActive = true;
 
         Log.i(TAG, "enable()");
+    }
+
+    private void restart() {
+        mStartTime = System.currentTimeMillis();
+        mHandler.broadcastNow(); // synchronize broadcasts
     }
 
     private void disable() {
@@ -147,7 +149,12 @@ public class LockService extends Service implements LocationListener
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent != null && ACTION_SHUTDOWN.equals(intent.getAction())) {
+        if(intent == null) {
+            Log.e(TAG, "onStartCommand() with null intent -- this shouldn't happen");
+            return START_NOT_STICKY;
+        }
+
+        if(ACTION_SHUTDOWN.equals(intent.getAction())) {
             if(mIsActive) {
                 disable();
             } else {
@@ -156,12 +163,31 @@ public class LockService extends Service implements LocationListener
             return START_NOT_STICKY;
         }
 
-        if(mIsActive) {
-            Log.i(TAG, "Start intent received but already running -- restarting");
-            disable();
+        if(ACTION_RESTART.equals(intent.getAction())) {
+            if(mIsActive) {
+                Log.i(TAG, "Start intent received but already running -- restarting");
+                restart();
+            } else {
+                Log.e(TAG, "ACTION_RESTART intent received by inactive service");
+            }
+            return START_NOT_STICKY;
         }
 
-        enable();
+        if(ACTION_UI_UPDATE.equals(intent.getAction())) {
+            if(mIsActive) {
+                mHandler.broadcastNow();
+            } else {
+                Log.e(TAG, "ACTION_RESTART intent received by inactive service");
+            }
+            return START_NOT_STICKY;
+        }
+
+        // by default just start the service
+        if(mIsActive) {
+            Log.e(TAG, "Trying to start an already active service.");
+        } else {
+            enable();
+        }
         return START_NOT_STICKY;
     }
 
