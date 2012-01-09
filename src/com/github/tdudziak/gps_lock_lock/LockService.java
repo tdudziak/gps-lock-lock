@@ -113,6 +113,7 @@ public class LockService extends Service implements LocationListener
     @Override
     public void onCreate() {
         mNotificationUi = new NotificationUi(this);
+        ((LockApplication) getApplication()).setLockService(this);
     }
 
     @Override
@@ -121,6 +122,7 @@ public class LockService extends Service implements LocationListener
             Log.e(TAG, "Destroying despite ongoing tracking.");
             disable();
         }
+        ((LockApplication) getApplication()).setLockService(null);
     }
 
     private void enable() {

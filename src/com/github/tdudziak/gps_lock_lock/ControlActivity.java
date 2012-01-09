@@ -57,7 +57,6 @@ public class ControlActivity extends Activity implements OnClickListener
         mButtonRestart.setText(String.format(r_format, LockService.LOCK_LOCK_MINUTES));
 
         mTextStatus = (TextView) findViewById(R.id.textStatus);
-        String s_format = getResources().getString(R.string.text_status);
         mTextStatus.setText("<status unknown>"); // FIXME
 
         mUiUpdateBroadcastReceiver = new BroadcastReceiver() {

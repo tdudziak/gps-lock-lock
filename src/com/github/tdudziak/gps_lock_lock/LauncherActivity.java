@@ -38,11 +38,18 @@ public class LauncherActivity extends Activity implements OnCancelListener, OnCl
         LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            startService(new Intent(this, LockService.class));
-
-            // Launch control activity if configured so.
+            LockService service = ((LockApplication) getApplication()).getLockService();
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-            if(!prefs.getBoolean("backgroundLaunch", false)) {
+            boolean show_control_screen = !prefs.getBoolean("backgroundLaunch", false);
+
+            // Start service if not running. Otherwise just show the control activity.
+            if(service == null) {
+                startService(new Intent(this, LockService.class));
+            } else {
+                show_control_screen = true;
+            }
+
+            if(show_control_screen) {
                 startActivity(new Intent(this, ControlActivity.class));
             }
 
