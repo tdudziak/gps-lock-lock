@@ -35,6 +35,7 @@ public class LockService extends Service implements LocationListener
 {
     private final String TAG = "LockService";
     private final long GPS_MIN_TIME = 0; // 20000; FIXME FIXME
+    private static final int HANDLER_WHAT = 0; // "what" value used in handler messages
 
     public final static String ACTION_SHUTDOWN = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_SHUTDOWN";
     public final static String ACTION_RESTART = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_RESTART";
@@ -49,12 +50,9 @@ public class LockService extends Service implements LocationListener
     private long mStartTime;
     private long mLastFixTime = 0;
     private LocationManager mLocationManager;
-    private RefreshHandler mHandler;
     private NotificationUi mNotificationUi;
 
-    private class RefreshHandler extends Handler {
-        public static final int WHAT = 0;
-
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -64,50 +62,57 @@ public class LockService extends Service implements LocationListener
                 return;
             }
 
-            // FIXME: Ugly duplicate code
-            long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
-            long remaining = LOCK_LOCK_MINUTES - minutes;
+            // Re-request location updates every minute or so. Some phones seem to stop searching for
+            // GPS fix after a while if no satellites are visible (probably to conserve energy) but this
+            // behavior doesn't seem to be documented anywhere.
+            mLocationManager.removeUpdates(LockService.this);
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, 0, LockService.this);
 
-            if(remaining <= 0) {
+            if(getRemainingTime() <= 0) {
                 disable();
-                return;
+            } else {
+                broadcastUiUpdateMessage(false);
+
+                // Schedule another update at the beginning of next minute + 0.5 second.
+                long min_elapsed = (System.currentTimeMillis() - mStartTime) / (60*1000);
+                long next_update_time = mStartTime + 60*1000*(min_elapsed + 1) + 500;
+                long next_update_delta = next_update_time - System.currentTimeMillis();
+                removeMessages(HANDLER_WHAT);
+                sendEmptyMessageDelayed(HANDLER_WHAT, next_update_delta);
             }
-
-            broadcastMessage(false);
-
-            // Schedule another update.
-            removeMessages(WHAT);
-            sendEmptyMessageDelayed(WHAT, 1000); // FIXME: the delay is way too small
         }
+    };
 
-        public void broadcastMessage(boolean last_message) {
-            long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
-            long remaining = LOCK_LOCK_MINUTES - minutes;
-            long last_fix = (System.currentTimeMillis() - mLastFixTime)/(1000*60);
+    private long getRemainingTime() {
+        long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
+        return LOCK_LOCK_MINUTES - minutes;
+    }
 
-            if(mLastFixTime == 0) last_fix = -1; // special value meaning "never"
-            if(remaining <= 0 || last_message) remaining = 0; // special value meaning "no time left"
+    private void broadcastUiUpdateMessage(boolean last_message) {
+        long remaining = getRemainingTime();
+        long last_fix = (System.currentTimeMillis() - mLastFixTime)/(1000*60);
 
-            Intent intent = new Intent(ACTION_UI_UPDATE);
-            intent.putExtra(EXTRA_TIME_LEFT, (int) remaining);
-            intent.putExtra(EXTRA_LAST_FIX, (int) last_fix);
+        if(mLastFixTime == 0) last_fix = -1; // special value meaning "never"
+        if(remaining <= 0 || last_message) remaining = 0; // special value meaning "no time left"
 
-            Log.v(TAG, "Broadcasting: " + intent.toString());
+        Intent intent = new Intent(ACTION_UI_UPDATE);
+        intent.putExtra(EXTRA_TIME_LEFT, (int) remaining);
+        intent.putExtra(EXTRA_LAST_FIX, (int) last_fix);
 
-            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(LockService.this);
-            lbm.sendBroadcast(intent);
-        }
+        Log.v(TAG, String.format("broadcastUiUpdateMessage(); EXTRA_TIME_LEFT=%d; EXTRA_LAST_FIX=%d", remaining, last_fix));
 
-        public void broadcastNow() {
-            removeMessages(WHAT);
-            sendEmptyMessage(WHAT);
-        }
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(LockService.this);
+        lbm.sendBroadcast(intent);
+    }
+
+    public void requestUiUpdate() {
+        mHandler.removeMessages(HANDLER_WHAT);
+        mHandler.sendEmptyMessage(HANDLER_WHAT);
     }
 
     @Override
     public void onCreate() {
         mNotificationUi = new NotificationUi(this);
-        mHandler = new RefreshHandler();
     }
 
     @Override
@@ -121,7 +126,7 @@ public class LockService extends Service implements LocationListener
     private void enable() {
         mStartTime = System.currentTimeMillis();
         mNotificationUi.enable(); // setup UI
-        mHandler.broadcastNow(); // start broadcasting UI update intents
+        requestUiUpdate(); // start broadcasting UI update intents
 
         // Setup GPS listening.
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -134,12 +139,13 @@ public class LockService extends Service implements LocationListener
 
     private void restart() {
         mStartTime = System.currentTimeMillis();
-        mHandler.broadcastNow(); // synchronize broadcasts
+        requestUiUpdate(); // synchronize broadcasts
+        Log.i(TAG, "restart()");
     }
 
     private void disable() {
-        mHandler.broadcastMessage(true);
-        mHandler.removeMessages(RefreshHandler.WHAT);
+        broadcastUiUpdateMessage(true);
+        mHandler.removeMessages(HANDLER_WHAT);
         mLocationManager.removeUpdates(this);
         stopForeground(true);
         mNotificationUi.disable();
@@ -159,13 +165,13 @@ public class LockService extends Service implements LocationListener
                 disable();
             } else {
                 Log.e(TAG, "ACTION_SHUTDOWN intent received by already inactive service");
+                enable();
             }
             return START_NOT_STICKY;
         }
 
         if(ACTION_RESTART.equals(intent.getAction())) {
             if(mIsActive) {
-                Log.i(TAG, "Start intent received but already running -- restarting");
                 restart();
             } else {
                 Log.e(TAG, "ACTION_RESTART intent received by inactive service");
@@ -175,9 +181,9 @@ public class LockService extends Service implements LocationListener
 
         if(ACTION_UI_UPDATE.equals(intent.getAction())) {
             if(mIsActive) {
-                mHandler.broadcastNow();
+                requestUiUpdate();
             } else {
-                Log.e(TAG, "ACTION_RESTART intent received by inactive service");
+                Log.e(TAG, "ACTION_UI_UPDATE intent received by inactive service");
             }
             return START_NOT_STICKY;
         }
@@ -212,7 +218,7 @@ public class LockService extends Service implements LocationListener
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         Log.v(TAG, "onStatusChanged(); status=" + status);
-        mHandler.broadcastNow();
+        requestUiUpdate();
     }
 
     @Override

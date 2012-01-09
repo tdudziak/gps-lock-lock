@@ -64,7 +64,7 @@ class NotificationUi
             return;
         }
 
-        if(last_fix <= 0) {
+        if(last_fix < 0) {
             title = mService.getString(R.string.notification_title_nofix);
         } else if(last_fix > 0) {
             title = String.format(mService.getString(R.string.notification_title), last_fix);
