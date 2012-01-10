@@ -21,6 +21,7 @@ package com.github.tdudziak.gps_lock_lock;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -28,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -44,11 +46,10 @@ public class LockService extends Service implements LocationListener
     public static final String EXTRA_TIME_LEFT = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_TIME_LEFT";
     public static final String EXTRA_LAST_FIX = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_LAST_FIX";
 
-    public static final long LOCK_LOCK_MINUTES = 5;
-
     private boolean mIsActive = false;
     private long mStartTime;
     private long mLastFixTime = 0;
+    private int mLockTime;
     private LocationManager mLocationManager;
     private NotificationUi mNotificationUi;
 
@@ -85,7 +86,7 @@ public class LockService extends Service implements LocationListener
 
     private long getRemainingTime() {
         long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
-        return LOCK_LOCK_MINUTES - minutes;
+        return mLockTime - minutes;
     }
 
     private void broadcastUiUpdateMessage(boolean last_message) {
@@ -126,6 +127,8 @@ public class LockService extends Service implements LocationListener
     }
 
     private void enable() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        mLockTime = prefs.getInt("lockTime", 5);
         mStartTime = System.currentTimeMillis();
         mNotificationUi.enable(); // setup UI
         requestUiUpdate(); // start broadcasting UI update intents
@@ -140,7 +143,11 @@ public class LockService extends Service implements LocationListener
     }
 
     private void restart() {
+        // FIXME: Reduce code duplication.
         mStartTime = System.currentTimeMillis();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        mLockTime = prefs.getInt("lockTime", 5);
+
         requestUiUpdate(); // synchronize broadcasts
         Log.i(TAG, "restart()");
     }

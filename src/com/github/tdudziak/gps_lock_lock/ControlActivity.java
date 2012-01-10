@@ -23,7 +23,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.view.Menu;
@@ -53,8 +55,6 @@ public class ControlActivity extends Activity implements OnClickListener
 
         mButtonRestart = (Button) findViewById(R.id.buttonRestart);
         mButtonRestart.setOnClickListener(this);
-        String r_format = getResources().getString(R.string.button_restart);
-        mButtonRestart.setText(String.format(r_format, LockService.LOCK_LOCK_MINUTES));
 
         mTextStatus = (TextView) findViewById(R.id.textStatus);
         mTextStatus.setText("<status unknown>"); // FIXME
@@ -111,6 +111,12 @@ public class ControlActivity extends Activity implements OnClickListener
         Intent intent = new Intent(LockService.ACTION_UI_UPDATE);
         intent.setClass(this, LockService.class);
         startService(intent);
+
+        // update the text on restart button
+        String r_format = getResources().getString(R.string.button_restart);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        int lock_time = prefs.getInt("lockTime", 5);
+        mButtonRestart.setText(String.format(r_format, lock_time));
 
         super.onResume();
     }
