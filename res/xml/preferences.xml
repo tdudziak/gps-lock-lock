@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://github.com/tdudziak/gps-lock-lock/schema">
+
     <CheckBoxPreference
         android:key="backgroundLaunch"
         android:title="Launch in background"
         android:summary="Don't show the control screen on startup."
         android:defaultValue="false" />
+
+    <com.github.tdudziak.gps_lock_lock.SeekBarPreference
+        android:key="lockTime"
+        android:title="Default time"
+        app:max="30"
+        app:min="1"
+        android:summary="How many minutes the GPS will be kept online."
+        android:defaultValue="5" />
+
 </PreferenceScreen>
