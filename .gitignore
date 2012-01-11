@@ -14,3 +14,7 @@ lint.xml
 local.properties
 .classpath
 .project
+
+# generated content
+market_icon.png
+res/drawable-*/ic_launcher.png
