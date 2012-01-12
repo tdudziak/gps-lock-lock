@@ -34,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
 
 public class ControlActivity extends Activity implements OnClickListener
@@ -154,7 +155,8 @@ public class ControlActivity extends Activity implements OnClickListener
             mProgressStatus.setVisibility(View.VISIBLE);
         } else {
             String s_format = getResources().getString(R.string.text_status);
-            mTextStatus.setText(String.format(s_format, minutes));
+            String text = String.format(s_format, minutes);
+            mTextStatus.setText(Html.fromHtml(text));
             mProgressStatus.setVisibility(View.INVISIBLE);
             mTextStatus.setVisibility(View.VISIBLE);
         }
