@@ -1,6 +1,7 @@
 package com.github.tdudziak.gps_lock_lock;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.preference.Preference;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -39,12 +40,15 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 
     @Override
     protected void onBindView(View view) {
-        mSeekBar = (SeekBar) view.findViewById(R.id.preferenceSeekBar);
-        mValue = (TextView) view.findViewById(R.id.preferenceTextValue);
+        // Restore value. If necessary, clamp to desired range.
+        int value = getPersistedInt(getDefaultDefault());
+        if(value < mMin) value = mMin;
+        if(value > mMax) value = mMax;
 
         mSeekBar.setOnSeekBarChangeListener(this);
         mSeekBar.setMax(mMax-mMin);
-        mSeekBar.setProgress(getPersistedInt(mMin)-mMin);
+        mSeekBar.setProgress(value - mMin);
+        mValue.setText(Integer.toString(value));
 
         super.onBindView(view);
     }
@@ -60,6 +64,9 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
         View title = super.onCreateView(parent);
         layout.addView(title, 0);
 
+        mSeekBar = (SeekBar) layout.findViewById(R.id.preferenceSeekBar);
+        mValue = (TextView) layout.findViewById(R.id.preferenceTextValue);
+
         return layout;
     }
 
@@ -68,6 +75,11 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
         if(!restore) {
             persistInt((Integer) defaultValue);
         }
+    }
+
+    @Override
+    protected Object onGetDefaultValue(TypedArray a, int index) {
+        return a.getInt(index, getDefaultDefault());
     }
 
     @Override
@@ -83,5 +95,9 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         notifyChanged();
+    }
+
+    private int getDefaultDefault() {
+        return (mMin+mMax)/2;
     }
 }
