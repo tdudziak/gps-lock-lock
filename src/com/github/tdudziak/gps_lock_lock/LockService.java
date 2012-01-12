@@ -170,40 +170,41 @@ public class LockService extends Service implements LocationListener
             return START_NOT_STICKY;
         }
 
+        boolean start_service = false;
+
         if(ACTION_SHUTDOWN.equals(intent.getAction())) {
             if(mIsActive) {
                 disable();
             } else {
-                Log.e(TAG, "ACTION_SHUTDOWN intent received by already inactive service");
-                enable();
+                Log.e(TAG, "ACTION_SHUTDOWN intent received by already inactive service.");
             }
-            return START_NOT_STICKY;
-        }
-
-        if(ACTION_RESTART.equals(intent.getAction())) {
+        } else if(ACTION_RESTART.equals(intent.getAction())) {
             if(mIsActive) {
                 restart();
             } else {
-                Log.e(TAG, "ACTION_RESTART intent received by inactive service");
+                Log.i(TAG, "ACTION_RESTART intent received by inactive service. Starting.");
+                start_service = true;
             }
-            return START_NOT_STICKY;
-        }
-
-        if(ACTION_UI_UPDATE.equals(intent.getAction())) {
+        } else if(ACTION_UI_UPDATE.equals(intent.getAction())) {
             if(mIsActive) {
                 requestUiUpdate();
             } else {
-                Log.e(TAG, "ACTION_UI_UPDATE intent received by inactive service");
+                Log.i(TAG, "ACTION_UI_UPDATE intent received by inactive service. Starting.");
+                start_service = true;
             }
-            return START_NOT_STICKY;
+        } else {
+            // by default just start the service
+            if(mIsActive) {
+                Log.e(TAG, "Trying to start an already active service.");
+            } else {
+                start_service = true;
+            }
         }
 
-        // by default just start the service
-        if(mIsActive) {
-            Log.e(TAG, "Trying to start an already active service.");
-        } else {
+        if(start_service) {
             enable();
         }
+
         return START_NOT_STICKY;
     }
 
