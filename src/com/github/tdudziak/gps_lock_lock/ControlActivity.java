@@ -27,6 +27,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,6 +39,7 @@ import android.text.method.LinkMovementMethod;
 public class ControlActivity extends Activity implements OnClickListener
 {
     private TextView mTextStatus;
+    private ProgressBar mProgressStatus;
     private BroadcastReceiver mUiUpdateBroadcastReceiver;
     private Button mButtonRestart;
 
@@ -57,7 +59,7 @@ public class ControlActivity extends Activity implements OnClickListener
         mButtonRestart.setOnClickListener(this);
 
         mTextStatus = (TextView) findViewById(R.id.textStatus);
-        mTextStatus.setText("<status unknown>"); // FIXME
+        mProgressStatus = (ProgressBar) findViewById(R.id.progressStatus);
 
         mUiUpdateBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -65,8 +67,7 @@ public class ControlActivity extends Activity implements OnClickListener
                 int left = intent.getIntExtra(LockService.EXTRA_TIME_LEFT, -1);
                 assert left != -1;
 
-                String s_format = getResources().getString(R.string.text_status);
-                mTextStatus.setText(String.format(s_format, left));
+                setStatus(left);
 
                 if(left <= 0) {
                     // This is the last message; no time left. Shutdown.
@@ -111,6 +112,7 @@ public class ControlActivity extends Activity implements OnClickListener
         Intent intent = new Intent(LockService.ACTION_UI_UPDATE);
         intent.setClass(this, LockService.class);
         startService(intent);
+        setStatus(null);
 
         // update the text on restart button
         String r_format = getResources().getString(R.string.button_restart);
@@ -144,5 +146,17 @@ public class ControlActivity extends Activity implements OnClickListener
         }
 
         return super.onMenuItemSelected(featureId, item);
+    }
+
+    private void setStatus(Integer minutes) {
+        if(minutes == null) {
+            mTextStatus.setVisibility(View.INVISIBLE);
+            mProgressStatus.setVisibility(View.VISIBLE);
+        } else {
+            String s_format = getResources().getString(R.string.text_status);
+            mTextStatus.setText(String.format(s_format, minutes));
+            mProgressStatus.setVisibility(View.INVISIBLE);
+            mTextStatus.setVisibility(View.VISIBLE);
+        }
     }
 }
