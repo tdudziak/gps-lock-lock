@@ -129,9 +129,16 @@ public class ControlActivity extends Activity implements OnClickListener
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        Intent intent;
+
         switch(item.getItemId()) {
         case R.id.menuItemSettings:
-            Intent intent = new Intent(this, AppPreferenceActivity.class);
+            intent = new Intent(this, AppPreferenceActivity.class);
+            startActivityForResult(intent, 0);
+            return true;
+
+        case R.id.menuItemAbout:
+            intent = new Intent(this, AboutActivity.class);
             startActivityForResult(intent, 0);
             return true;
         }

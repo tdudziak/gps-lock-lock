@@ -20,5 +20,6 @@
                   android:launchMode="singleTask">
         </activity>
         <activity android:name="AppPreferenceActivity"></activity>
+        <activity android:name="AboutActivity"/>
     </application>
 </manifest> 

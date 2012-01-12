@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GPS Lock-Lock</string>
+    <string name="copyright">"\u00A9 2012 Tomasz Dudziak"</string>
+    <string name="gpl_declaration">
+        This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.
+    </string>
+    <string name="warranty">
+        This program is distributed in the hope that it will be useful,
+        but <u>WITHOUT ANY WARRANTY</u> without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+        <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
+        for more details.
+    </string>
     <string name="notification_ticker">Forcing GPS activity</string>
     <string name="notification_title_nofix">No GPS position yet</string>
     <string name="notification_title_1minfix">Recent GPS position</string>
     <string name="notification_title">Last GPS read %d min. ago</string>
     <string name="notification_text">Keeping GPS online for %d min.</string>
     <string name="alert_nogps">GPS seems to be disabled. Please enable GPS fist.</string>
-    <string name="text_status"><center>This application will keep your GPS active for the next <b>%s minutes</b>.</center></string>
+    <string name="text_status">This application will keep your GPS active for the next <b>%s minutes</b>.</string>
     <string name="text_info">This raises power consumption slightly but solves common problem of losing GPS fix when switching between non-GPS and some GPS-using apps. For source code and more details see <a href="https://github.com/tdudziak/gps-lock-lock">app page</a> on GitHub.</string>
-    <string name="button_restart">Give me another %d minutes!</string>
+    <string name="button_restart">Restart with %d minute timeout</string>
 </resources>
