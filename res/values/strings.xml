@@ -27,6 +27,6 @@
         and more details see <a href="https://github.com/tdudziak/gps-lock-lock">app page</a>
         on GitHub.
     </string>
-    <string name="text_config">Some configuration is available via <i>menu</i> key.</string>
-    <string name="button_restart">Restart with %d minute timeout</string>
+    <string name="text_menu_info">Press menu button for more.</string>
+    <string name="text_menu_restart">Restart (%d min)</string>
 </resources>

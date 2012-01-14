@@ -26,7 +26,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.view.Menu;
@@ -35,14 +34,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 
-public class ControlActivity extends Activity implements OnClickListener
+public class ControlActivity extends Activity
 {
     private TextView mTextStatus;
     private ProgressBar mProgressStatus;
     private BroadcastReceiver mUiUpdateBroadcastReceiver;
-    private Button mButtonRestart;
 
     /** Called when the activity is first created. */
     @Override
@@ -50,17 +47,16 @@ public class ControlActivity extends Activity implements OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        // Enable links in textInfo.
-        TextView info = (TextView) findViewById(R.id.textInfo);
-        info.setMovementMethod(LinkMovementMethod.getInstance());
-
-        findViewById(R.id.buttonStop).setOnClickListener(this);
-
-        mButtonRestart = (Button) findViewById(R.id.buttonRestart);
-        mButtonRestart.setOnClickListener(this);
-
         mTextStatus = (TextView) findViewById(R.id.textStatus);
         mProgressStatus = (ProgressBar) findViewById(R.id.progressStatus);
+
+        // clicking on menu info text opens options menu
+        findViewById(R.id.textOptionsMenuInfo).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openOptionsMenu();
+            }
+        });
 
         mUiUpdateBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -76,25 +72,6 @@ public class ControlActivity extends Activity implements OnClickListener
                 }
             }
         };
-    }
-
-    @Override
-    public void onClick(View v) {
-        Intent intent;
-
-        switch(v.getId()) {
-        case R.id.buttonRestart:
-            intent = new Intent(LockService.ACTION_RESTART);
-            intent.setClass(this, LockService.class);
-            startService(intent);
-            break;
-
-        case R.id.buttonStop:
-            intent = new Intent(LockService.ACTION_SHUTDOWN);
-            intent.setClass(this, LockService.class);
-            startService(intent);
-            break;
-        }
     }
 
     @Override
@@ -121,12 +98,6 @@ public class ControlActivity extends Activity implements OnClickListener
             setStatus(service.getRemainingTime());
         }
 
-        // update the text on restart button
-        String r_format = getResources().getString(R.string.button_restart);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        int lock_time = prefs.getInt("lockTime", 5);
-        mButtonRestart.setText(String.format(r_format, lock_time));
-
         super.onResume();
     }
 
@@ -134,6 +105,17 @@ public class ControlActivity extends Activity implements OnClickListener
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.options_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // set appropriate text on "restart" menu item
+        String format = getResources().getString(R.string.text_menu_restart);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        int lock_time = prefs.getInt("lockTime", 5);
+        menu.findItem(R.id.menuItemRestart).setTitle(String.format(format, lock_time));
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -150,6 +132,18 @@ public class ControlActivity extends Activity implements OnClickListener
             intent = new Intent(this, AboutActivity.class);
             startActivityForResult(intent, 0);
             return true;
+
+        case R.id.menuItemRestart:
+            intent = new Intent(LockService.ACTION_RESTART);
+            intent.setClass(this, LockService.class);
+            startService(intent);
+            break;
+
+        case R.id.menuItemStop:
+            intent = new Intent(LockService.ACTION_SHUTDOWN);
+            intent.setClass(this, LockService.class);
+            startService(intent);
+            break;
         }
 
         return super.onMenuItemSelected(featureId, item);
