@@ -113,7 +113,13 @@ public class ControlActivity extends Activity implements OnClickListener
         Intent intent = new Intent(LockService.ACTION_UI_UPDATE);
         intent.setClass(this, LockService.class);
         startService(intent);
-        setStatus(null);
+        setStatus(0);
+
+        // if service is already running we can update status text immediately
+        LockService service = ((LockApplication) getApplication()).getLockService();
+        if(service != null) {
+            setStatus(service.getRemainingTime());
+        }
 
         // update the text on restart button
         String r_format = getResources().getString(R.string.button_restart);
@@ -149,8 +155,8 @@ public class ControlActivity extends Activity implements OnClickListener
         return super.onMenuItemSelected(featureId, item);
     }
 
-    private void setStatus(Integer minutes) {
-        if(minutes == null) {
+    private void setStatus(int minutes) {
+        if(minutes == 0) {
             mTextStatus.setVisibility(View.INVISIBLE);
             mProgressStatus.setVisibility(View.VISIBLE);
         } else {

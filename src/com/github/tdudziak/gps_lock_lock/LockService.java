@@ -84,9 +84,9 @@ public class LockService extends Service implements LocationListener
         }
     };
 
-    private long getRemainingTime() {
+    public int getRemainingTime() {
         long minutes = (System.currentTimeMillis() - mStartTime)/(1000*60);
-        return mLockTime - minutes;
+        return (int) (mLockTime - minutes);
     }
 
     private void broadcastUiUpdateMessage(boolean last_message) {
