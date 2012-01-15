@@ -21,12 +21,7 @@
     <string name="notification_title">Last GPS read %d min. ago</string>
     <string name="notification_text">Keeping GPS online for %d min.</string>
     <string name="alert_nogps">GPS seems to be disabled. Please enable GPS fist.</string>
-    <string name="text_status">This application will keep your GPS active for the next &lt;b>%s minutes&lt;/b>.</string>
-    <string name="text_info">This raises power consumption slightly but solves common problem of
-        losing GPS fix when switching between non-GPS and some GPS-using apps. For source code
-        and more details see <a href="https://github.com/tdudziak/gps-lock-lock">app page</a>
-        on GitHub.
-    </string>
+    <string name="text_status">&lt;b>%s minutes&lt;/b> remaining</string>
     <string name="text_menu_info">Press menu button for more.</string>
     <string name="text_menu_restart">Restart (%d min)</string>
 </resources>
