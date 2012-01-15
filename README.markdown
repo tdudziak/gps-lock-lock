@@ -1,24 +1,45 @@
-GPS fix is not something that should be taken for granted and sometimes you
-need to wait a good few seconds or minutes before you finally get your precise
-position. Thus, I find it slightly annoying that every time I switch from
-Google Maps to another application I lose track of my coordinates. While many
-navigation apps keep GPS turned on while in background, the default
-energy-preserving behavior of all other apps is slightly annoying.
+# What does this app do? #
+You run it, it keeps your GPS on for a configurable amount of time. Typically,
+when you have GPS enabled on your phone it isn't actively seeking your position
+unless some application requests it. Using this app you can force the behavior
+you want.
 
-I tried to fix that by running a navigation app in the background every time I
-knew I want to use the GPS for a while but it was a bit of a hassle. This app
-tries to be easier to use -- You just run it and it launches a background
-service that will request GPS position for next 5 minutes. Remaining time is
-shown in the notification area.
+# Why would I want to do that? #
+Acquiring GPS position is a process that will always take some time. Things
+like aGPS can speed this up but you may still need to wait for about 20 seconds
+depending on weather, your data connection, etc. This can be especially
+annoying in the camera application which starts requesting your position in
+preview mode.  It's hard to imagine waiting for GPS fix while people are posing
+for your photo. I assume users don't usually wait that much and settle for less
+precise non-gps coordinates but sometimes you would really like to tag you
+photos precisely. If you can anticipate that you will need GPS in a few
+minutes you can pre-launch it using this app.
 
-This is a quick hack and it should be considered work-in-progress. The locking
-time is currently unconfigurable (unless you count editing the source code) and
-it's probably buggy like hell. It doesn't even have a proper app icon!
+The other reason is to prevent GPS from going offline when you still need it.
+Some applications (like Google Maps for instance) don't request GPS position
+when in background. If you switch to another app to read a text or email you
+almost immediately lose GPS position. Theoretically, you should be able to
+re-acquire it quickly but in practice it sometimes feels almost like a cold
+start.
 
-The app has been tested on [Galaxy S](http://en.wikipedia.org/wiki/Samsung_Galaxy_S) 
-with Android 2.2.1. If you find that this app works or doesn't work with any
-other phone you're very welcome to inform me.
+# What doesn't this app do? #
+This app will not make the sole process of acquiring GPS fix any faster (though
+using it you can start it earlier so the position will be available on time). It
+doesn't track or store your position -- it just keeps *requesting* it from the
+system. It doesn't collect any data or display advertisements. None of these
+features are planned.
 
+# State of implemenation #
+The application seems to work properly but I'm occasionally tweaking details,
+changing layout, etc. It should be considered work-in-progress.
+
+# Devices #
+I'm using [Samsung Galaxy S](http://en.wikipedia.org/wiki/Samsung_Galaxy_S)
+with Android 2.2.1. That's currently the only device on which I can test this
+app but in theory it should be compatible with Android 2.2+. I'm not using any
+APIs outside of standard Android stuff.
+
+# Disclaimer #
 Please note that this program comes with **ABSOLUTELY NO WARRANTY**. I am not
 liable for drained batteries, lost data, or any other unimaginable horrors
 caused by this app.
