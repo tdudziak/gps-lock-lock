@@ -26,20 +26,30 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 
-public class ControlActivity extends Activity
+public class ControlActivity extends Activity implements OnItemClickListener
 {
     private TextView mTextStatus;
     private ProgressBar mProgressStatus;
     private BroadcastReceiver mUiUpdateBroadcastReceiver;
+
+    private ListView mListMenu;
+    private String[] mListMenuItems;
+    private ArrayAdapter<String> mListMenuAdapter;
+
+    private static final int MENU_RESTART = 0;
+    private static final int MENU_SETTINGS = 1;
+    private static final int MENU_HELP = 2;
+    private static final int MENU_STOP = 3;
 
     /** Called when the activity is first created. */
     @Override
@@ -50,13 +60,17 @@ public class ControlActivity extends Activity
         mTextStatus = (TextView) findViewById(R.id.textStatus);
         mProgressStatus = (ProgressBar) findViewById(R.id.progressStatus);
 
-        // clicking on menu info text opens options menu
-        findViewById(R.id.textOptionsMenuInfo).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openOptionsMenu();
-            }
-        });
+        // setup the menu ListView
+        mListMenu = (ListView) findViewById(R.id.listMenu);
+        mListMenuItems = new String[] {
+                "", // dynamically generated in onResume()
+                getString(R.string.menu_settings),
+                getString(R.string.menu_help),
+                getString(R.string.menu_stop)
+        };
+        mListMenuAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListMenuItems);
+        mListMenu.setAdapter(mListMenuAdapter);
+        mListMenu.setOnItemClickListener(this);
 
         mUiUpdateBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -98,55 +112,43 @@ public class ControlActivity extends Activity
             setStatus(service.getRemainingTime());
         }
 
+        // update text on "Restart" list item
+        String format = getResources().getString(R.string.menu_restart);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        int lock_time = prefs.getInt("lockTime", 5);
+        mListMenuItems[MENU_RESTART] = String.format(format, lock_time);
+        mListMenuAdapter.notifyDataSetChanged();
+
         super.onResume();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.options_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        // set appropriate text on "restart" menu item
-        String format = getResources().getString(R.string.text_menu_restart);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        int lock_time = prefs.getInt("lockTime", 5);
-        menu.findItem(R.id.menuItemRestart).setTitle(String.format(format, lock_time));
-
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent;
 
-        switch(item.getItemId()) {
-        case R.id.menuItemSettings:
+        switch(position) {
+        case MENU_SETTINGS:
             intent = new Intent(this, AppPreferenceActivity.class);
             startActivityForResult(intent, 0);
-            return true;
+            break;
 
-        case R.id.menuItemAbout:
+        case MENU_HELP:
             intent = new Intent(this, AboutActivity.class);
             startActivityForResult(intent, 0);
-            return true;
+            break;
 
-        case R.id.menuItemRestart:
+        case MENU_RESTART:
             intent = new Intent(LockService.ACTION_RESTART);
             intent.setClass(this, LockService.class);
             startService(intent);
             break;
 
-        case R.id.menuItemStop:
+        case MENU_STOP:
             intent = new Intent(LockService.ACTION_SHUTDOWN);
             intent.setClass(this, LockService.class);
             startService(intent);
             break;
         }
-
-        return super.onMenuItemSelected(featureId, item);
     }
 
     private void setStatus(int minutes) {
