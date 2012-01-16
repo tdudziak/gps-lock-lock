@@ -153,14 +153,13 @@ public class ControlActivity extends Activity implements OnItemClickListener
 
     private void setStatus(int minutes) {
         if(minutes == 0) {
-            mTextStatus.setVisibility(View.INVISIBLE);
+            mTextStatus.setText("");
             mProgressStatus.setVisibility(View.VISIBLE);
         } else {
             String s_format = getResources().getString(R.string.text_status);
             String text = String.format(s_format, minutes);
             mTextStatus.setText(Html.fromHtml(text));
             mProgressStatus.setVisibility(View.INVISIBLE);
-            mTextStatus.setVisibility(View.VISIBLE);
         }
     }
 }
