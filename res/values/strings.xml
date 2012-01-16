@@ -15,7 +15,7 @@
         <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
         for more details.
     </string>
-    <string name="notification_ticker">Forcing GPS activity</string>
+    <string name="notification_ticker">GPS Lock-Lock started</string>
     <string name="notification_title_nofix">No GPS position yet</string>
     <string name="notification_title_1minfix">Recent GPS position</string>
     <string name="notification_title">Last GPS read %d min. ago</string>
@@ -23,6 +23,7 @@
     <string name="alert_nogps">GPS seems to be disabled. Please enable GPS fist.</string>
     <string name="text_status">&lt;b>%s minutes&lt;/b> remaining</string>
     <string name="text_menu_info">Press menu button for more.</string>
+    <string name="toast_restart">GPS Lock-Lock restarted</string>
 
     <string name="menu_restart">Restart (%d min)</string>
     <string name="menu_settings">Settings</string>

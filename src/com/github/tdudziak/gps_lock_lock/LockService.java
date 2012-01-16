@@ -32,6 +32,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 public class LockService extends Service implements LocationListener
 {
@@ -150,6 +151,11 @@ public class LockService extends Service implements LocationListener
 
         requestUiUpdate(); // synchronize broadcasts
         Log.i(TAG, "restart()");
+
+        // display toast notification on restart
+        String message = getString(R.string.toast_restart);
+        Toast toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     private void disable() {
