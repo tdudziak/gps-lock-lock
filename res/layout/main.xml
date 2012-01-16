@@ -11,10 +11,10 @@
         android:layout_alignParentTop="true"
         android:gravity="center_horizontal"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:background="@android:color/background_light"
-        android:textColor="@android:color/primary_text_light"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:background="@drawable/header"
+        android:textColor="@android:color/black"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         />
 
     <ProgressBar
@@ -24,14 +24,15 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="20dp"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true"
+        />
 
     <ListView
         android:id="@+id/listMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/textStatus"
-        android:layout_centerHorizontal="true" >
-    </ListView>
+        android:layout_centerHorizontal="true"
+        />
 
 </RelativeLayout>
