@@ -9,9 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 class NotificationUi
 {
+    private static final String TAG = LockApplication.TAG_PREFIX + "NotificationUi";
     private static final int NOTIFICATION_ID = 1;
 
     private Notification mNotification;
@@ -24,7 +26,7 @@ class NotificationUi
     public NotificationUi(Service service) {
         mService = service;
 
-        int icon = R.drawable.ic_stat_example;
+        int icon = R.drawable.ic_stat_notification;
         CharSequence ticker = mService.getText(R.string.notification_ticker);
         mNotificationManager = (NotificationManager) mService.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(mService, ControlActivity.class);
@@ -48,11 +50,13 @@ class NotificationUi
     public void enable() {
         IntentFilter filter = new IntentFilter(LockService.ACTION_UI_UPDATE);
         LocalBroadcastManager.getInstance(mService).registerReceiver(mReceiver, filter);
+        Log.i(TAG, "enable()");
     }
 
     public void disable() {
         LocalBroadcastManager.getInstance(mService).unregisterReceiver(mReceiver);
         mServiceIsForeground = false;
+        Log.i(TAG, "disable()");
     }
 
     private void redraw(int remaining, int last_fix) {
@@ -78,6 +82,7 @@ class NotificationUi
         if(mServiceIsForeground) {
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
         } else {
+            Log.v(TAG, "First update after enable(); calling startForeground()");
             mService.startForeground(NOTIFICATION_ID, mNotification);
             mServiceIsForeground = true;
         }

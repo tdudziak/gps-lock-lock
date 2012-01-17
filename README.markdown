@@ -46,3 +46,9 @@ caused by this app.
 
 You are free to modify and redistribute this software within certain
 conditions. See COPYING for details.
+
+Artwork distributed with this program is licensed under
+[Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/).
+Notification icons were generated using [Android Asset Studio](http://android-ui-utils.googlecode.com/).
+The application icon is loosely inspired by a stock Android drawable `stat_sys_gps_on`
+available as a part of [Android Open Source Project](http://source.android.com/).
