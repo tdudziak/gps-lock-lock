@@ -21,17 +21,18 @@ package com.github.tdudziak.gps_lock_lock;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 public class AboutActivity extends Activity
 {
+    private WebView mWebView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.about);
-
-        // enable GPL link
-        TextView tv = (TextView) findViewById(R.id.textWarranty);
-        tv.setMovementMethod(LinkMovementMethod.getInstance());
+        mWebView = new WebView(this);
+        mWebView.loadUrl("file:///android_asset/help.html");
+        setContentView(mWebView);
 
         super.onCreate(savedInstanceState);
     }
