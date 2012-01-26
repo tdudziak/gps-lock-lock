@@ -13,7 +13,7 @@ import android.util.Log;
 
 class NotificationUi
 {
-    private static final String TAG = LockApplication.TAG_PREFIX + "NotificationUi";
+    private static final String TAG = "NotificationUi";
     private static final int NOTIFICATION_ID = 1;
 
     private Notification mNotification;
