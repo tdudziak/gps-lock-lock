@@ -25,7 +25,7 @@
     <string name="text_menu_info">Press menu button for more.</string>
     <string name="toast_restart">GPS Lock-Lock restarted</string>
 
-    <string name="menu_restart">Restart (%d min)</string>
+    <string name="menu_restart">Reset counter to %d minutes</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_help">Help</string>
     <string name="menu_stop">Stop and exit</string>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menuItemRestart"
+          android:titleCondensed="Restart" />
+    <item android:id="@+id/menuItemSettings"
+          android:titleCondensed="Settings"
+          android:title="Change app preferences" />
+    <item android:id="@+id/menuItemHelp"
+          android:titleCondensed="Help"
+          android:title="How to use this application" />
+    <item android:id="@+id/menuItemStop"
+          android:titleCondensed="Stop"
+          android:title="Deactivate GPS and exit" />
+</menu>

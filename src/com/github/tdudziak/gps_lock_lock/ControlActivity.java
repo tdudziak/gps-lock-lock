@@ -43,13 +43,7 @@ public class ControlActivity extends Activity implements OnItemClickListener
     private BroadcastReceiver mUiUpdateBroadcastReceiver;
 
     private ListView mListMenu;
-    private String[] mListMenuItems;
-    private ArrayAdapter<String> mListMenuAdapter;
-
-    private static final int MENU_RESTART = 0;
-    private static final int MENU_SETTINGS = 1;
-    private static final int MENU_HELP = 2;
-    private static final int MENU_STOP = 3;
+    private MenuAdapter mMenuAdapter;
 
     /** Called when the activity is first created. */
     @Override
@@ -62,14 +56,8 @@ public class ControlActivity extends Activity implements OnItemClickListener
 
         // setup the menu ListView
         mListMenu = (ListView) findViewById(R.id.listMenu);
-        mListMenuItems = new String[] {
-                "", // dynamically generated in onResume()
-                getString(R.string.menu_settings),
-                getString(R.string.menu_help),
-                getString(R.string.menu_stop)
-        };
-        mListMenuAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListMenuItems);
-        mListMenu.setAdapter(mListMenuAdapter);
+        mMenuAdapter = new MenuAdapter(this, R.menu.menu);
+        mListMenu.setAdapter(mMenuAdapter);
         mListMenu.setOnItemClickListener(this);
 
         mUiUpdateBroadcastReceiver = new BroadcastReceiver() {
@@ -116,8 +104,8 @@ public class ControlActivity extends Activity implements OnItemClickListener
         String format = getResources().getString(R.string.menu_restart);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         int lock_time = prefs.getInt("lockTime", 5);
-        mListMenuItems[MENU_RESTART] = String.format(format, lock_time);
-        mListMenuAdapter.notifyDataSetChanged();
+        mMenuAdapter.getItemById(R.id.menuItemRestart).title = String.format(format, lock_time);
+        mMenuAdapter.notifyDataSetChanged();
 
         super.onResume();
     }
@@ -126,24 +114,24 @@ public class ControlActivity extends Activity implements OnItemClickListener
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent;
 
-        switch(position) {
-        case MENU_SETTINGS:
+        switch((int) id) {
+        case R.id.menuItemSettings:
             intent = new Intent(this, AppPreferenceActivity.class);
             startActivityForResult(intent, 0);
             break;
 
-        case MENU_HELP:
+        case R.id.menuItemHelp:
             intent = new Intent(this, AboutActivity.class);
             startActivityForResult(intent, 0);
             break;
 
-        case MENU_RESTART:
+        case R.id.menuItemRestart:
             intent = new Intent(LockService.ACTION_RESTART);
             intent.setClass(this, LockService.class);
             startService(intent);
             break;
 
-        case MENU_STOP:
+        case R.id.menuItemStop:
             intent = new Intent(LockService.ACTION_SHUTDOWN);
             intent.setClass(this, LockService.class);
             startService(intent);
