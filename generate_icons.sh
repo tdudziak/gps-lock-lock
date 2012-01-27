@@ -1,15 +1,38 @@
-#!/bin/sh
+#!/bin/bash
 
-shadow_opts="( +clone -background black -shadow 200x5-3+3 ) +swap -background none -layers merge +repage"
-input_file="./icon.svgz"
+# resize a given file for multiple screen densities
+function convert_file {
+    in_path=$1       # input file name (.svgz)
+    sizes_name=$2    # name of associative array dpi->size
+    in_name=$(basename "$in_path")
 
-res_path() {
-    echo ./res/drawable-$1/ic_launcher.png
+    # passing associative arrays to functions is not directly possible
+    sizes_decl=$(declare -p $sizes_name)
+    eval "declare -A sizes=${sizes_decl#*=}"
+
+    for dpi in ${!sizes[@]}; do
+        out_path="res/drawable-$dpi/${in_name%.*}.png"
+        echo "$in_path -> $out_path [${sizes[$dpi]}]"
+        convert -background none "$in_path" -resize "${sizes[$dpi]}" "$out_path"
+    done
 }
 
-convert -background none "$input_file" $shadow_opts -resize 512x512 market_icon.png
+# create large icon with drop-down shadow for Android Market
+SHADOW_OPTS="( +clone -background black -shadow 200x5-3+3 ) +swap -background none -layers merge +repage"
+convert -background none "svg/ic_launcher.svgz" $SHADOW_OPTS -resize 512x512 market_icon.png
 
-convert -background none "$input_file" $shadow_opts -resize 96x96 `res_path xhdpi`
-convert -background none "$input_file" $shadow_opts -resize 72x72 `res_path hdpi`
-convert -background none "$input_file" $shadow_opts -resize 48x48 `res_path mdpi`
-convert -background none "$input_file" -resize 36x36 `res_path ldpi`
+# create launcher icons
+declare -A LAUNCHER_SZ=([ldpi]='36x36' [mdpi]='48x48' [hdpi]='72x72' [xhdpi]='96x96')
+convert_file "svg/ic_launcher.svgz" LAUNCHER_SZ
+
+# create icons for ListView-based menu
+declare -A MENU_ICON_SZ=([ldpi]='24x24' [mdpi]='32x32' [hdpi]='48x48')
+FILES="svg/ic_exit.svgz svg/ic_restart.svgz svg/ic_help.svgz svg/ic_settings.svgz"
+for fn in $FILES; do
+    convert_file "$fn" MENU_ICON_SZ
+done
+
+# convert -background none "svg/exit.svgz" -resize 48x48 "./res/drawable-hdpi/exit.png"
+# convert -background none "svg/ic_restart.svgz" -resize 48x48 "./res/drawable-hdpi/ic_restart.png"
+# convert -background none "svg/ic_help.svgz" -resize 48x48 "./res/drawable-hdpi/ic_help.png"
+# convert -background none "svg/ic_settings.svgz" -resize 48x48 "./res/drawable-hdpi/ic_settings.png"

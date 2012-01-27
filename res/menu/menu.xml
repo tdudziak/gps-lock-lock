@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menuItemRestart"
+          android:icon="@drawable/ic_restart"
           android:titleCondensed="Restart" />
     <item android:id="@+id/menuItemSettings"
           android:titleCondensed="Settings"
+          android:icon="@drawable/ic_settings"
           android:title="Change app preferences" />
     <item android:id="@+id/menuItemHelp"
           android:titleCondensed="Help"
+          android:icon="@drawable/ic_help"
           android:title="How to use this application" />
     <item android:id="@+id/menuItemStop"
           android:titleCondensed="Stop"
+          android:icon="@drawable/ic_exit"
           android:title="Deactivate GPS and exit" />
 </menu>
