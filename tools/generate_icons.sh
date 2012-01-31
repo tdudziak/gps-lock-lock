@@ -1,5 +1,9 @@
 #!/bin/bash
 
+SCRIPT_PATH=$(dirname "$(readlink -f $0)")
+PROJECT_ROOT=$(readlink -f "$SCRIPT_PATH/../")
+cd "$PROJECT_ROOT"
+
 # resize a given file for multiple screen densities
 function convert_file {
     in_path=$1       # input file name (.svgz)
@@ -31,8 +35,3 @@ FILES="svg/ic_exit.svgz svg/ic_restart.svgz svg/ic_help.svgz svg/ic_settings.svg
 for fn in $FILES; do
     convert_file "$fn" MENU_ICON_SZ
 done
-
-# convert -background none "svg/exit.svgz" -resize 48x48 "./res/drawable-hdpi/exit.png"
-# convert -background none "svg/ic_restart.svgz" -resize 48x48 "./res/drawable-hdpi/ic_restart.png"
-# convert -background none "svg/ic_help.svgz" -resize 48x48 "./res/drawable-hdpi/ic_help.png"
-# convert -background none "svg/ic_settings.svgz" -resize 48x48 "./res/drawable-hdpi/ic_settings.png"
