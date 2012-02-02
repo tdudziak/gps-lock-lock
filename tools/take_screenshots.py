@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+# NOTE: This script behaves differently when invoked via monkeyrunner.
+# In monkeyrunner environment it connects to a single device and captures
+# screenshots. When ran normally, it creates several AVDs, starts emulators,
+# and calls the monkeyrunner part for each one.
+
 IN_MONKEYRUNNER = True
 try:
     from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
@@ -69,7 +74,10 @@ def monkeyscript():
 
 def main():
     avds = [
-            Avd('ics-tablet',   '-t "Google Inc.:Google APIs:14" --skin WSVGA'),
+            Avd('gingerbread-hvga', '-t android-10 --skin HVGA'),
+            # FIXME: There are problems with taking screenshots on ICS
+            # Avd('ics-wxga', '-t android-15 --skin WXGA720'),
+            # Avd('ics-tablet', '-t android-15 --skin WSVGA'),
             Avd('froyo-wvga', '-t android-8 --skin WVGA800'),
             Avd('froyo-qvga', '-t android-8 --skin QVGA'),
         ]
@@ -101,7 +109,9 @@ def main():
 
     for avd in avds:
         async_work(avd)
-        # FIXME: for some reason monkeyrunner fails if executed in parallel
+        # FIXME: for some reason monkeyrunner fails with NullPointerException
+        # from time to time. Executing in parallel seems to make this more
+        # likely :(
         # Thread(target=async_work, args=[avd]).start()
 
 
