@@ -50,7 +50,8 @@
      in between standard targets -->
 
     <target name="-pre-build">
-        <exec executable="./generate_icons.sh"/>
+        <exec executable="tools/generate_icons.sh"/>
+        <exec executable="tools/generate_help.sh"/>
     </target>
 
 <!--
