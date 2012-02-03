@@ -40,7 +40,8 @@ import android.widget.Toast;
  * by handling several controlling intents and broadcasting {@link #ACTION_UI_UPDATE}
  * with status updates.</p>
  *
- * <p>You can start the service using <code>startService()</code> with empty action:
+ * <p>You can start the service using {@link Service#startService startService()}
+ * with empty action:
  * <pre class="code">
  * activity.startService(new Intent(context, LockService.class));</pre>
  * Same mechanism can be used to control the running service with {@link #ACTION_RESTART} and
@@ -75,8 +76,8 @@ public class LockService extends Service implements LocationListener
      * information.</p>
      *
      * <p>Sometimes it is convenient to force a global status update. This can be done by
-     * passing an ACTION_UI_UPDATE intent <emph>to</emph> the service as a {@link startService}
-     * parameter.</p>
+     * passing an ACTION_UI_UPDATE intent <emph>to</emph> the service as a
+     * {@link Service#startService startService()} parameter.</p>
      */
     public final static String ACTION_UI_UPDATE = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_UI_UPDATE";
 

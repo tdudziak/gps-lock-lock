@@ -3,8 +3,8 @@ package com.github.tdudziak.gps_lock_lock;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,15 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+/***
+ * An integer {@link Preference} that can be changed by moving a {@link SeekBar}
+ * inside {@link PreferenceActivity}. It supports following XML parameters
+ * (all living in the namespace <code>http://github.com/tdudziak/gps-lock-lock/schema</code>):
+ * <dl>
+ *      <dt><code>min</code></dt><dd>minimal value (1 by default)</dd>
+ *      <dt><code>max</code></dt><dd>maximal value (100 by default)</dd>
+ * </dl>
+ */
 public class SeekBarPreference extends Preference implements OnSeekBarChangeListener
 {
     private static final String XML_NAMESPACE = "http://github.com/tdudziak/gps-lock-lock/schema";

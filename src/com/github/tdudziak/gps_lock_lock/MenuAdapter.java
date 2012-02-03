@@ -11,12 +11,25 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+/***
+ * <p>A {@link android.widget.ListAdapter ListAdapter} that provides list items
+ * from a menu XML resource.</p>
+ *
+ * <p>Only plain, on-level menus are supported. If an element have both <code>title</code>
+ * and <code>titleCondensed</code> attributes specified, the full (non-condensed) title is
+ * displayed below. Icons are supported.</p>
+ *
+ * <p>You cannot use a {@link MenuInflater} for menus using this class. Instead, pass the
+ * resource id to the constructor. Items are represented by {@link MenuAdapter.Item}, not by
+ * {@link android.view.MenuItem}.</p>
+ */
 public class MenuAdapter extends BaseAdapter
 {
     List<Item> mItems = new ArrayList<Item>();
