@@ -54,6 +54,16 @@
         <exec executable="tools/generate_help.sh"/>
     </target>
 
+    <target name="doc">
+        <javadoc
+            destdir="docs"
+            use="true"
+            sourcepath="src"
+            classpath="${sdk.dir}/platforms/android-8/android.jar:libs/android-support-v4.jar"
+            linkoffline="http://d.android.com/reference ${sdk.dir}/docs/reference/"
+        />
+    </target>
+
 <!--
     <target name="-pre-compile">
     </target>
