@@ -34,6 +34,25 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+/***
+ * <p>A service that implements the main gps-locking functionality of the application.
+ * This service does not support binding but communicates with the rest of the application
+ * by handling several controlling intents and broadcasting {@link #ACTION_UI_UPDATE}
+ * with status updates.</p>
+ *
+ * <p>You can start the service using <code>startService()</code> with empty action:
+ * <pre class="code">
+ * activity.startService(new Intent(context, LockService.class));</pre>
+ * Same mechanism can be used to control the running service with {@link #ACTION_RESTART} and
+ * {@link #ACTION_SHUTDOWN}.</p>
+ *
+ * <p>To get information <emph>from</emph> the service, register a broadcast receiver for the
+ * {@link #ACTION_UI_UPDATE} intent. This intent is broadcasted locally using {@link LocalBroadcastManager}
+ * mechanism. You can register a receiver with:
+ * <pre class="code">
+ * IntentFilter filter = new IntentFilter(LockService.ACTION_UI_UPDATE);
+ * LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter);</pre></p>
+ */
 public class LockService extends Service implements LocationListener
 {
     private final String TAG = "LockService";
@@ -42,9 +61,38 @@ public class LockService extends Service implements LocationListener
 
     public final static String ACTION_SHUTDOWN = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_SHUTDOWN";
     public final static String ACTION_RESTART = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_RESTART";
+
+    /***
+     * Requests or delivers a status update.
+     *
+     * <p>Every time relevant parts of this service's state change, an ACTION_UI_UPDATE
+     * intent is broadcasted locally using {@link LocalBroadcastManager}. Any part of
+     * the application that displays status information to the user should register
+     * appropriate {@link android.content.BroadcastReceiver}.</p>
+     *
+     * <p>The broadcasted intent comes with two "extras" attached: {@link #EXTRA_TIME_LEFT}
+     * and {@link #EXTRA_LAST_FIX}. They can be used to instantly extract relevant status
+     * information.</p>
+     *
+     * <p>Sometimes it is convenient to force a global status update. This can be done by
+     * passing an ACTION_UI_UPDATE intent <emph>to</emph> the service as a {@link startService}
+     * parameter.</p>
+     */
     public final static String ACTION_UI_UPDATE = "com.github.tdudziak.gps_lock_lock.LockService.ACTION_UI_UPDATE";
 
+    /***
+     * Time, in minutes, until the service will shutdown. This is an extra integer value
+     * attached to each {@link #ACTION_UI_UPDATE} intent. When the service is shutting down,
+     * it must broadcast a last, final {@link #ACTION_UI_UPDATE} intent with this value set to
+     * zero.
+     */
     public static final String EXTRA_TIME_LEFT = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_TIME_LEFT";
+
+    /***
+     * Time, in minutes, since the last GPS fix. This is an extra integer value attached to
+     * each {@link #ACTION_UI_UPDATE} intent. Values lower than 0 mean "infinity", i.e., no
+     * GPS fix was <emph>ever</emph> registered.
+     */
     public static final String EXTRA_LAST_FIX = "com.github.tdudziak.gps_lock_lock.LockService.EXTRA_LAST_FIX";
 
     private boolean mIsActive = false;
