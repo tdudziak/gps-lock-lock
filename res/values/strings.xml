@@ -1,32 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GPS Lock-Lock</string>
-    <string name="copyright">"\u00A9 2012 Tomasz Dudziak"</string>
-    <string name="gpl_declaration">
-        This program is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version.
-    </string>
-    <string name="warranty">
-        This program is distributed in the hope that it will be useful,
-        but <u>WITHOUT ANY WARRANTY</u> without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-        <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
-        for more details.
-    </string>
+    <string name="toast_restart">GPS Lock-Lock restarted</string>
     <string name="notification_ticker">GPS Lock-Lock started</string>
     <string name="notification_title_nofix">No GPS position yet</string>
     <string name="notification_title_1minfix">Recent GPS position</string>
     <string name="notification_title">Last GPS read %d min. ago</string>
     <string name="notification_text">Keeping GPS online for %d min.</string>
-    <string name="alert_nogps">GPS seems to be disabled. Please enable GPS fist.</string>
     <string name="text_status">&lt;b>%s minutes&lt;/b> remaining</string>
-    <string name="text_menu_info">Press menu button for more.</string>
-    <string name="toast_restart">GPS Lock-Lock restarted</string>
-
+    <string name="alert_nogps">GPS seems to be disabled. Please enable GPS fist.</string>
     <string name="menu_restart">Reset counter to %d minutes</string>
-    <string name="menu_settings">Settings</string>
-    <string name="menu_help">Help</string>
-    <string name="menu_stop">Stop and exit</string>
 </resources>

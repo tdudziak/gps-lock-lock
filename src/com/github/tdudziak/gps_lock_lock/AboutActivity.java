@@ -20,9 +20,7 @@ package com.github.tdudziak.gps_lock_lock;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.text.method.LinkMovementMethod;
 import android.webkit.WebView;
-import android.widget.TextView;
 
 public class AboutActivity extends Activity
 {

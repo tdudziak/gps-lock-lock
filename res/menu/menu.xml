@@ -3,6 +3,7 @@
     <item android:id="@+id/menuItemRestart"
           android:icon="@drawable/ic_restart"
           android:titleCondensed="Restart" />
+          <!-- title for this item is set dynamically based on the "menu_restart" format string -->
     <item android:id="@+id/menuItemSettings"
           android:titleCondensed="Settings"
           android:icon="@drawable/ic_settings"
