@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>GPS Lock-Lock Help</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<style type="text/css">
+    h1 { font-size: 110%; }
+    p { margin-left: 0.5em; margin-right: 0.5em; }
+</style>
+<body>
+<h1>What does this app do?</h1>
+
+<p>You run it, it keeps your GPS on for a configurable amount of time. Typically,
+when you have GPS enabled on your phone it isn't actively seeking your position
+unless some application requests it. Using this app you can force the behavior
+you want.</p>
+
+<h1>Why would I want to do that?</h1>
+
+<p>Even in perfect weather and with rapid data connection acquiring GPS position
+seems to take a good couple of seconds. It's nice to have precisely-geotagged
+photos but waiting for GPS while you are taking a picture can be annoying.
+If you can anticipate that you will need GPS soon you can pre-launch it using
+this app.</p>
+
+<p>The other reason is to prevent GPS from going offline when you still need it.
+Some applications (like Google Maps for instance) don't request GPS position
+when in background. If you switch to another app to read a text or email you
+almost immediately lose GPS position. Theoretically, you should be able to
+re-acquire it quickly but in practice it sometimes feels almost like a cold
+start.</p>
+
+<h1>What this app doesn't do</h1>
+
+<p>This app will not make the sole process of acquiring GPS fix any faster (though
+using it you can start it earlier so the position will be available on time). It
+doesn't track or store your position — it just keeps <em>requesting</em> it from the
+system. It doesn't collect any data or display advertisements. None of these
+features are planned.</p>
+
+<h1>Disclaimer</h1>
+
+<p>Please note that this program comes with <strong>ABSOLUTELY NO WARRANTY</strong>.
+You are free to modify and redistribute this software within certain conditions.
+Source code is available on <a href="https://github.com/tdudziak/gps-lock-lock">GitHub</a>.
+Read the <code>COPYING</code> file in the source package for details.</p>
+
+<p>Artwork distributed with this program is licensed under
+<a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported License</a>.
+Notification icons were generated using <a href="http://android-ui-utils.googlecode.com/">Android Asset Studio</a>.
+The application icon is loosely inspired by a stock Android drawable <code>stat_sys_gps_on</code>
+available as a part of <a href="http://source.android.com/">Android Open Source Project</a>.</p>
+</body>
+</html>
