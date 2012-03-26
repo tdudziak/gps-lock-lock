@@ -22,6 +22,7 @@ class NotificationUi
     private BroadcastReceiver mReceiver;
     private Service mService;
     private boolean mServiceIsForeground = false;
+    private boolean mIsEnabled = false;
 
     public NotificationUi(Service service) {
         mService = service;
@@ -50,17 +51,24 @@ class NotificationUi
     public void enable() {
         IntentFilter filter = new IntentFilter(LockService.ACTION_UI_UPDATE);
         LocalBroadcastManager.getInstance(mService).registerReceiver(mReceiver, filter);
+        mIsEnabled = true;
         Log.i(TAG, "enable()");
     }
 
     public void disable() {
         LocalBroadcastManager.getInstance(mService).unregisterReceiver(mReceiver);
         mServiceIsForeground = false;
+        mIsEnabled = false;
         Log.i(TAG, "disable()");
     }
 
     private void redraw(int remaining, int last_fix) {
         String title, text;
+
+        if(!mIsEnabled) {
+            // this sometimes happens when disabled while some messages are still pending
+            return;
+        }
 
         if(remaining <= 0) {
             // This *must* be the last message; hide the notification.
